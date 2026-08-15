@@ -1,0 +1,158 @@
+<!doctype html>
+<html profile="http://www.w3.org/2005/10/profile">
+	<head>
+		<title>Cocktail Search</title>
+
+		<!-- basics -->
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+		<link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+
+		<!-- font and styles -->
+		<link href="https://fonts.googleapis.com/css?family=Fira+Sans:400,400i,700,700i,900,900i|Playfair+Display:400,500,600,700" rel="stylesheet">
+		<link href="stylesheet.css" rel="stylesheet" type="text/css">
+
+		<!-- jquery -->
+		<script
+			src="https://code.jquery.com/jquery-3.3.1.min.js"
+			integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+			crossorigin="anonymous">
+		</script>
+	</head>
+
+	<body>
+		<div id="wrapper" class="search">
+			<p id="back">
+				<a href="index.html">
+					<svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+						<path fill="currentColor" d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"></path>
+					</svg>
+				</a>
+			</p>
+
+			<section id="search-page">
+				<h1>Search Cocktails</h1>
+				<p>Enter at least one full word to search names, tags, and recipe text. Search does not support wildcards or abbreviations yet.</p>
+				<div class="search-controls">
+					<input type="text" id="search-input" placeholder="Search cocktails..." autocomplete="off">
+					<button id="search-button" type="button">Search</button>
+				</div>
+				<p id="search-message"></p>
+				<ul id="search-results"></ul>
+			</section>
+
+		</div>
+
+		<!-- lunr search library -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/lunr.js/2.3.9/lunr.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+		<script>
+		let searchIndex = [];
+		let lunrIndex;
+		let searchReady = false;
+
+		function renderResults(results) {
+			const resultsContainer = document.getElementById('search-results');
+			const message = document.getElementById('search-message');
+			resultsContainer.innerHTML = '';
+			message.textContent = '';
+
+			if (!results.length) {
+				message.textContent = 'No results found.';
+				return;
+			}
+
+			results.forEach(result => {
+				const item = searchIndex.find(doc => doc.url === result.ref);
+				if (!item) return;
+
+				const li = document.createElement('li');
+				const link = document.createElement('a');
+				link.href = item.url;
+				link.textContent = item.title;
+				li.appendChild(link);
+				resultsContainer.appendChild(li);
+			});
+		}
+
+		function performSearch() {
+			const query = document.getElementById('search-input').value.trim();
+			const message = document.getElementById('search-message');
+			const resultsContainer = document.getElementById('search-results');
+			message.textContent = '';
+			resultsContainer.innerHTML = '';
+
+			if (query.length === 0) {
+				return;
+			}
+
+			if (query.length < 2) {
+				message.textContent = 'Enter at least two characters to search.';
+				return;
+			}
+
+			if (!searchReady) {
+				message.textContent = 'Search index is still loading. Please wait a moment and try again.';
+				return;
+			}
+
+			try {
+				const results = lunrIndex.search(query);
+				renderResults(results);
+			} catch (err) {
+				console.warn('Search query failed', err);
+				message.textContent = 'Search could not be completed. Try a simpler query.';
+			}
+		}
+
+		function initSearch() {
+			const input = document.getElementById('search-input');
+			const button = document.getElementById('search-button');
+			const message = document.getElementById('search-message');
+
+			input.focus();
+			message.textContent = 'Loading search index...';
+
+			input.addEventListener('keydown', function (e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					performSearch();
+				}
+			});
+
+			button.addEventListener('click', performSearch);
+
+			fetch('search-index.json', { cache: 'no-store' })
+				.then(response => {
+					if (!response.ok) {
+						throw new Error('HTTP ' + response.status);
+					}
+					return response.json();
+				})
+				.then(data => {
+					searchIndex = data;
+					lunrIndex = lunr(function () {
+						this.ref('url');
+						this.field('title', { boost: 10 });
+						this.field('tags', { boost: 5 });
+						this.field('content');
+
+						searchIndex.forEach(doc => this.add(doc));
+					});
+					searchReady = true;
+					message.textContent = '';
+				})
+				.catch(() => {
+					console.warn('Unable to load search-index.json');
+					message.textContent = 'Unable to load search index. Refresh the page to retry.';
+				});
+		}
+
+		if (document.readyState === 'loading') {
+			window.addEventListener('DOMContentLoaded', initSearch);
+		} else {
+			initSearch();
+		}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# A hook script to find all cocktail Markdown files and list them in the
+# index.html page appropriately
+
+# Regenerate the index.html cocktail list and the search index using Node.
+if ! command -v node >/dev/null 2>&1; then
+  echo "[pre-commit] error: node not found; install Node.js to generate search-index.json and update index.html" >&2
+  exit 1
+fi
+
+if ! node ./scripts/update-index.js; then
+  echo "[pre-commit] error: index.html update failed" >&2
+  exit 1
+fi
+
+git add ./index.html
+
+if ! node ./scripts/build-search-index.js; then
+  echo "[pre-commit] error: search-index.json generation failed" >&2
+  exit 1
+fi
+
+git add ./search-index.json
+
+echo "[pre-commit] success: index.html and search-index.json updated"

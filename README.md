@@ -1,69 +1,47 @@
 # Cocktails
 
-Collection of cocktail recipes with personal notes, ready to publish with GitHub Pages.
+Collection of cocktail recipes with personal notes, published with GitHub Pages.
 
-## GitHub Pages
+The site is plain static HTML/CSS/JS — recipes stay in Markdown and are rendered
+in the browser. Same architecture as the recipes site, with a cocktail-native
+section layout and its own color palette.
 
-This repository is structured for GitHub Pages/Jekyll:
+## Adding a cocktail
 
-- `index.md` is the homepage.
-- `recipes/` contains recipe pages.
-- `recipes/template.md` is the reusable cocktail recipe template.
+1. Copy `cocktail-template.md` into `recipes/` as `your-cocktail-name.md`
+   (lowercase, hyphen-separated — the filename becomes the URL slug).
+2. Fill in the sections. Keep the `##` headings as-is; `recipe.html` maps each one
+   to a page section.
+3. Optionally add a hero image at `images/your-cocktail-name.jpg`.
+4. Commit. The pre-commit hook regenerates `index.html` and `search-index.json`.
 
-In GitHub, enable **Settings → Pages** and set the source to **Deploy from a branch** using the `main` branch (`/root`).
+## Local setup
 
-## Template
+Enable the pre-commit hook once per clone:
 
 ```
----
-layout: page
-title: "Cocktail Name"
----
-
-## Summary
-
-Short description of the cocktail and flavor profile.
-
-## Glassware
-
-e.g. Coupe, Highball, Rocks
-
-## Ingredients
-
-- 2 oz Base spirit
-- 3/4 oz Citrus juice
-- 1/2 oz Sweetener
-- 2 dashes Bitters
-
-## Garnish
-
-e.g. Citrus peel, cherry, mint sprig
-
-## Recommended Brands
-
-- **Base spirit:** Brand A, Brand B
-- **Liqueur/modifier:** Brand C
-- **Bitters:** Brand D
-
-## Equipment
-
-- Jigger
-- Shaker or mixing glass
-- Strainer
-
-## Instructions
-
-1. Add ingredients to shaker/mixing glass.
-2. Shake or stir with ice.
-3. Strain into chilled glass.
-4. Garnish and serve.
-
-## Notes
-
-- Variations
-- Personal adjustments
-
-## Tags
-
-e.g. sour, stirred, gin, rum, low-ABV
+git config core.hooksPath .githooks
 ```
+
+Regenerate manually at any time:
+
+```
+npm run update-index
+npm run build-search-index
+```
+
+Preview locally (needed for search — `fetch` of `search-index.json` fails over `file://`):
+
+```
+npx http-server .
+```
+
+## Deployment
+
+GitHub Pages, **Settings → Pages → Deploy from a branch**, branch `main`, folder `/ (root)`.
+Pushing to `main` publishes the site.
+
+The `Build Search Index` GitHub Action re-runs `scripts/update-index.js` and
+`scripts/build-search-index.js` on every push and commits the results, so the
+cocktail list and search index stay correct even if the local hook is skipped.
+`.nojekyll` keeps GitHub Pages from running the files through Jekyll.
