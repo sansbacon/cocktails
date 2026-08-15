@@ -14,7 +14,7 @@ if ! node ./scripts/update-index.js; then
   exit 1
 fi
 
-git add ./index.html
+git add ./index.html ./menu.html
 
 if ! node ./scripts/build-search-index.js; then
   echo "[pre-commit] error: search-index.json generation failed" >&2

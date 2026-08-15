@@ -1,0 +1,73 @@
+<!doctype html>
+<html profile="http://www.w3.org/2005/10/profile">
+	<head>
+		<title>Menu</title>
+
+		<!-- basics -->
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+		<link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+
+		<!-- font and styles -->
+		<link href="https://fonts.googleapis.com/css?family=Fira+Sans:400,400i,700,700i,900,900i|Playfair+Display:400,500,600,700" rel="stylesheet">
+		<link href="stylesheet.css" rel="stylesheet" type="text/css">
+
+		<script>
+			// MENU OPTIONS
+
+			// look in images/menus for a hero image named after the menu file
+			// (ex: summer-patio-party.md would use images/menus/summer-patio-party.jpg)
+			let lookForHeroImage = true;
+
+			// remember which shopping list items have been checked off
+			let rememberShoppingList = true;
+
+			// cocktail files, used to resolve [[wiki links]] to recipe pages
+			// DO NOT MODIFY LINE BELOW MANUALLY
+			let commitSetRecipes = ["tropical-thunder.md"];
+			// DO NOT MODIFY LINE ABOVE MANUALLY
+		</script>
+
+		<!-- showdown (markdown parser) -->
+		<!-- https://github.com/showdownjs -->
+		<script src="https://cdn.jsdelivr.net/npm/showdown@1.9.1/dist/showdown.min.js"></script>
+
+		<!-- jquery -->
+		<script
+			src="https://code.jquery.com/jquery-3.3.1.min.js"
+			integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+			crossorigin="anonymous">
+		</script>
+	</head>
+
+	<body>
+		<div id="wrapper" class="menu">
+
+			<!-- back button -->
+			<!-- icon via: https://fontawesome.com/icons/arrow-left -->
+			<p id="back">
+				<a href="index.html?view=menus">
+					<svg aria-hidden="true" focusable="false" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+						<path fill="currentColor" d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"></path>
+					</svg>
+				</a>
+			</p>
+
+			<!-- menu (details inserted with js) -->
+			<section id="heroimage"></section>
+			<section id="title"></section>
+			<section id="eventdetails"></section>
+			<section id="menusummary"></section>
+			<section id="cocktails"></section>
+			<hr />
+			<section id="shoppinglist"></section>
+			<section id="notes"></section>
+			<section id="tags"></section>
+		</div>
+	</body>
+
+	<!-- parses and displays the menu -->
+	<script src="utils.js"></script>
+	<script src="create-menu.js"></script>
+	<script src="mobile.js"></script>
+</html>

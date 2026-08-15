@@ -1,7 +1,7 @@
 <!doctype html>
 <html profile="http://www.w3.org/2005/10/profile">
 	<head>
-		<title>Cocktail Search</title>
+		<title>Search</title>
 
 		<!-- basics -->
 		<meta charset="UTF-8">
@@ -31,11 +31,16 @@
 			</p>
 
 			<section id="search-page">
-				<h1>Search Cocktails</h1>
-				<p>Enter at least one full word to search names, tags, and recipe text. Search does not support wildcards or abbreviations yet.</p>
+				<h1>Search</h1>
+				<p>Enter at least one full word to search names, tags, and text across cocktails and menus. Search does not support wildcards or abbreviations yet.</p>
 				<div class="search-controls">
-					<input type="text" id="search-input" placeholder="Search cocktails..." autocomplete="off">
+					<input type="text" id="search-input" placeholder="Search cocktails and menus..." autocomplete="off">
 					<button id="search-button" type="button">Search</button>
+				</div>
+				<div id="search-filter" role="group" aria-label="Filter results by type">
+					<button type="button" class="toggle-btn" data-type="all" aria-pressed="true">All</button>
+					<button type="button" class="toggle-btn" data-type="cocktail" aria-pressed="false">Cocktails</button>
+					<button type="button" class="toggle-btn" data-type="menu" aria-pressed="false">Menus</button>
 				</div>
 				<p id="search-message"></p>
 				<ul id="search-results"></ul>
@@ -50,6 +55,8 @@
 		let searchIndex = [];
 		let lunrIndex;
 		let searchReady = false;
+		let activeType = 'all';
+		let lastResults = [];
 
 		function renderResults(results) {
 			const resultsContainer = document.getElementById('search-results');
@@ -57,19 +64,31 @@
 			resultsContainer.innerHTML = '';
 			message.textContent = '';
 
-			if (!results.length) {
-				message.textContent = 'No results found.';
+			const items = results
+				.map(result => searchIndex.find(doc => doc.url === result.ref))
+				.filter(item => item && (activeType === 'all' || item.type === activeType));
+
+			if (!items.length) {
+				message.textContent = results.length
+					? 'No results of that type. Try the All filter.'
+					: 'No results found.';
 				return;
 			}
 
-			results.forEach(result => {
-				const item = searchIndex.find(doc => doc.url === result.ref);
-				if (!item) return;
-
+			items.forEach(item => {
 				const li = document.createElement('li');
 				const link = document.createElement('a');
 				link.href = item.url;
-				link.textContent = item.title;
+
+				const label = document.createElement('span');
+				label.textContent = item.title;
+
+				const badge = document.createElement('span');
+				badge.className = 'result-type ' + item.type;
+				badge.textContent = item.type === 'menu' ? 'Menu' : 'Cocktail';
+
+				link.appendChild(label);
+				link.appendChild(badge);
 				li.appendChild(link);
 				resultsContainer.appendChild(li);
 			});
@@ -81,6 +100,7 @@
 			const resultsContainer = document.getElementById('search-results');
 			message.textContent = '';
 			resultsContainer.innerHTML = '';
+			lastResults = [];
 
 			if (query.length === 0) {
 				return;
@@ -97,8 +117,8 @@
 			}
 
 			try {
-				const results = lunrIndex.search(query);
-				renderResults(results);
+				lastResults = lunrIndex.search(query);
+				renderResults(lastResults);
 			} catch (err) {
 				console.warn('Search query failed', err);
 				message.textContent = 'Search could not be completed. Try a simpler query.';
@@ -121,6 +141,16 @@
 			});
 
 			button.addEventListener('click', performSearch);
+
+			document.querySelectorAll('#search-filter .toggle-btn').forEach(btn => {
+				btn.addEventListener('click', function () {
+					activeType = btn.dataset.type;
+					document.querySelectorAll('#search-filter .toggle-btn').forEach(other => {
+						other.setAttribute('aria-pressed', other === btn ? 'true' : 'false');
+					});
+					renderResults(lastResults);
+				});
+			});
 
 			fetch('search-index.json', { cache: 'no-store' })
 				.then(response => {

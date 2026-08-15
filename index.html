@@ -13,7 +13,7 @@
 		<link href="stylesheet.css" rel="stylesheet" type="text/css">
 
 		<!-- jquery -->
-		<!-- loads the cocktails and adds the selected one below -->
+		<!-- loads the cocktails and menus and lists them below -->
 		<script
 			src="https://code.jquery.com/jquery-3.3.1.min.js"
 			integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
@@ -27,24 +27,40 @@
 			<!-- table of contents -->
 			<section id="toc">
 				<h1 id="mainTitle">Cocktails</h1>
-				<p id="navigation"></p>
-				<p class="search-link"><a href="search.html">Search all cocktails</a></p>
 
-				<ul> <!-- your cocktails will go here --> </ul>
+				<div id="view-toggle" role="group" aria-label="Choose a list">
+					<button type="button" class="toggle-btn" data-view="cocktails" aria-pressed="true">Cocktails</button>
+					<button type="button" class="toggle-btn" data-view="menus" aria-pressed="false">Menus</button>
+				</div>
+
+				<p class="search-link"><a href="search.html">Search cocktails and menus</a></p>
+
+				<div id="cocktails-view" class="toc-view">
+					<p class="navigation"></p>
+					<ul></ul>
+					<p class="empty-note" hidden>No cocktails yet. Copy <code>cocktail-template.md</code> into <code>recipes/</code> to add one.</p>
+				</div>
+
+				<div id="menus-view" class="toc-view" hidden>
+					<p class="navigation"></p>
+					<ul></ul>
+					<p class="empty-note" hidden>No menus yet. Copy <code>menu-template.md</code> into <code>menus/</code> to add one.</p>
+				</div>
+
 			</section>
 
 		</div>
 	</body>
 
 	<script>
-    // The following line is replaced by pre-commit hooks to list all cocktails
-    // DO NOT MODIFY LINE BELOW MANUALLY
+    // The following lines are replaced by the pre-commit hook / build workflow
+    // DO NOT MODIFY LINES BELOW MANUALLY
     let commitSetRecipes = ["tropical-thunder.md"];
-    // DO NOT MODIFY LINE ABOVE MANUALLY
-    let files = commitSetRecipes;
+    let commitSetMenus = ["summer-patio-party.md"];
+    // DO NOT MODIFY LINES ABOVE MANUALLY
 	</script>
 
 	<!-- javascript does the rest :) -->
 	<script src="utils.js"></script>
-	<script src="list-recipes.js"></script>
+	<script src="list-index.js"></script>
 </html>

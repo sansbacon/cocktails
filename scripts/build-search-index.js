@@ -1,12 +1,21 @@
 const fs = require('fs');
 const path = require('path');
 
-const recipesDir = path.join(__dirname, '..', 'recipes');
-const outputFile = path.join(__dirname, '..', 'search-index.json');
+const rootDir = path.join(__dirname, '..');
+const recipesDir = path.join(rootDir, 'recipes');
+const menusDir = path.join(rootDir, 'menus');
+const outputFile = path.join(rootDir, 'search-index.json');
 
-function slugToUrl(slug) {
-  const baseName = slug.replace(/\.md$/i, '');
-  return `recipe.html#${baseName}`;
+function listMarkdown(dir) {
+  if (!fs.existsSync(dir)) {
+    return [];
+  }
+  return fs.readdirSync(dir, { withFileTypes: true })
+    .filter(dirent => dirent.isFile())
+    .map(dirent => dirent.name)
+    .filter(name => name.toLowerCase().endsWith('.md'))
+    .filter(name => !name.startsWith('_'))
+    .sort();
 }
 
 function stripFrontMatter(markdown) {
@@ -40,6 +49,7 @@ function stripMarkdown(markdown) {
     .replace(/\n+/g, ' ')
     .replace(/```[\s\S]*?```/g, ' ')
     .replace(/`[^`]*`/g, ' ')
+    .replace(/\[\[([^\]]+)\]\]/g, '$1')
     .replace(/\*\*([^*]+)\*\*/g, '$1')
     .replace(/\*([^*]+)\*/g, '$1')
     .replace(/__([^_]+)__/g, '$1')
@@ -52,27 +62,23 @@ function stripMarkdown(markdown) {
     .trim();
 }
 
-function buildIndex() {
-  const files = fs.readdirSync(recipesDir, { withFileTypes: true })
-    .filter(dirent => dirent.isFile())
-    .map(dirent => dirent.name)
-    .filter(name => name.toLowerCase().endsWith('.md'))
-    .filter(name => !name.startsWith('_'))
-    .sort();
-
-  const docs = files.map(filename => {
-    const fullPath = path.join(recipesDir, filename);
-    const content = stripFrontMatter(fs.readFileSync(fullPath, 'utf8'));
+function buildDocs(dir, type, page) {
+  return listMarkdown(dir).map(filename => {
+    const content = stripFrontMatter(fs.readFileSync(path.join(dir, filename), 'utf8'));
     return {
       title: extractTitle(content, filename),
-      url: slugToUrl(filename),
+      url: `${page}#${filename.replace(/\.md$/i, '')}`,
+      type: type,
       tags: extractTags(content),
       content: stripMarkdown(content),
     };
   });
-
-  fs.writeFileSync(outputFile, JSON.stringify(docs, null, 2) + '\n', 'utf8');
-  console.log(`Wrote ${docs.length} documents to ${outputFile}`);
 }
 
-buildIndex();
+const docs = [
+  ...buildDocs(recipesDir, 'cocktail', 'recipe.html'),
+  ...buildDocs(menusDir, 'menu', 'menu.html'),
+];
+
+fs.writeFileSync(outputFile, JSON.stringify(docs, null, 2) + '\n', 'utf8');
+console.log(`Wrote ${docs.length} documents to ${outputFile}`);
