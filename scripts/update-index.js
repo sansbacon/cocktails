@@ -1,11 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 
-const recipesDir = path.join(__dirname, '..', 'recipes');
-const indexFile = path.join(__dirname, '..', 'index.html');
+const rootDir = path.join(__dirname, '..');
+const recipesDir = path.join(rootDir, 'recipes');
+const menusDir = path.join(rootDir, 'menus');
 
-function getRecipeFiles() {
-  return fs.readdirSync(recipesDir, { withFileTypes: true })
+function listMarkdown(dir) {
+  if (!fs.existsSync(dir)) {
+    return [];
+  }
+  return fs.readdirSync(dir, { withFileTypes: true })
     .filter(dirent => dirent.isFile())
     .map(dirent => dirent.name)
     .filter(name => name.toLowerCase().endsWith('.md'))
@@ -13,22 +17,35 @@ function getRecipeFiles() {
     .sort();
 }
 
-function buildCommitSetLine(files) {
-  const quoted = files.map(name => `"${name}"`);
-  return `    let commitSetRecipes = [${quoted.join(', ')}];`;
+function updateSentinel(html, varName, files) {
+  const regex = new RegExp(`^([ \\t]*)let ${varName} = \\[.*\\];`, 'm');
+  if (!regex.test(html)) {
+    return null;
+  }
+  const list = files.map(name => `"${name}"`).join(', ');
+  return html.replace(regex, (match, indent) => `${indent}let ${varName} = [${list}];`);
 }
 
-function updateIndexFile(files) {
-  const html = fs.readFileSync(indexFile, 'utf8');
-  const regex = /^[ \t]*let commitSetRecipes = \[.*\];\r?$/m;
+function updateFile(filename, sentinels) {
+  const fullPath = path.join(rootDir, filename);
+  let html = fs.readFileSync(fullPath, 'utf8');
 
-  if (!regex.test(html)) {
-    throw new Error('Unable to find the commitSetRecipes line in index.html');
+  for (const [varName, files] of Object.entries(sentinels)) {
+    const updated = updateSentinel(html, varName, files);
+    if (updated === null) {
+      throw new Error(`Unable to find the ${varName} line in ${filename}`);
+    }
+    html = updated;
   }
 
-  const updated = html.replace(regex, buildCommitSetLine(files));
-  fs.writeFileSync(indexFile, updated, 'utf8');
-  console.log(`Updated index.html with ${files.length} cocktail(s).`);
+  fs.writeFileSync(fullPath, html, 'utf8');
 }
 
-updateIndexFile(getRecipeFiles());
+const recipes = listMarkdown(recipesDir);
+const menus = listMarkdown(menusDir);
+
+updateFile('index.html', { commitSetRecipes: recipes, commitSetMenus: menus });
+// menu.html needs the cocktail list so [[wiki links]] can be resolved
+updateFile('menu.html', { commitSetRecipes: recipes });
+
+console.log(`Updated index.html with ${recipes.length} cocktail(s) and ${menus.length} menu(s).`);
