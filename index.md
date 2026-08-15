@@ -5,4 +5,4 @@ title: Cocktails
 
 ## Recipes
 
-- [Cocktail recipe template](/recipes/template)
+- [Tropical Thunder](/recipes/tropical-thunder)
