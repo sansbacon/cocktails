@@ -17,7 +17,10 @@ e.g. Coupe, Highball, Rocks
 - 3/4 oz Citrus juice
 - 1/2 oz Sweetener
 - 2 dashes Bitters
-- Garnish
+
+## Garnish
+
+e.g. Citrus peel, cherry, mint sprig
 
 ## Recommended Brands
 
