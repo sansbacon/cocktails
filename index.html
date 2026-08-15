@@ -1,0 +1,50 @@
+<!doctype html>
+<html profile="http://www.w3.org/2005/10/profile">
+	<head>
+		<title>Cocktails</title>
+
+		<!-- basics -->
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+		<link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+
+		<!-- font and styles -->
+		<link href="https://fonts.googleapis.com/css?family=Fira+Sans:400,400i,700,700i,900|Playfair+Display:400,500,600,700" rel="stylesheet">
+		<link href="stylesheet.css" rel="stylesheet" type="text/css">
+
+		<!-- jquery -->
+		<!-- loads the cocktails and adds the selected one below -->
+		<script
+			src="https://code.jquery.com/jquery-3.3.1.min.js"
+			integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+			crossorigin="anonymous">
+		</script>
+	</head>
+
+	<body>
+		<div id="wrapper" class="index">
+
+			<!-- table of contents -->
+			<section id="toc">
+				<h1 id="mainTitle">Cocktails</h1>
+				<p id="navigation"></p>
+				<p class="search-link"><a href="search.html">Search all cocktails</a></p>
+
+				<ul> <!-- your cocktails will go here --> </ul>
+			</section>
+
+		</div>
+	</body>
+
+	<script>
+    // The following line is replaced by pre-commit hooks to list all cocktails
+    // DO NOT MODIFY LINE BELOW MANUALLY
+    let commitSetRecipes = ["tropical-thunder.md"];
+    // DO NOT MODIFY LINE ABOVE MANUALLY
+    let files = commitSetRecipes;
+	</script>
+
+	<!-- javascript does the rest :) -->
+	<script src="utils.js"></script>
+	<script src="list-recipes.js"></script>
+</html>
